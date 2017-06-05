@@ -217,7 +217,7 @@ exports.randomplay = function (req, res, next) {
          questionsMade[questionsMade.indexOf(rand)] = 0;
          count--;
          return models.Quiz.findById(show);
-        } else {    
+        } else {
          res.render('quizzes/random_nomore', {
                score: score
             });
