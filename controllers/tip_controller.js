@@ -5,7 +5,10 @@ var Sequelize = require('sequelize');
 // Autoload la pista asociado a :tipId
 exports.load = function (req, res, next, tipId) {
 
-    models.Tip.findById(tipId,{include:[{model:models.User,as:'Author'}]}) //tocado
+    models.Tip.findById(tipId, {
+        include: [{model: models.User, as: 'Author'}
+        ]
+    })
     .then(function (tip) {
         if (tip) {
             req.tip = tip;
@@ -40,8 +43,8 @@ exports.create = function (req, res, next) {
     var tip = models.Tip.build(
         {
             text: req.body.text,
-            QuizId: req.quiz.id, 
-            AuthorId:req.session.user.id //tocado
+            QuizId: req.quiz.id,
+            AuthorId: req.session.user.id
         });
 
     tip.save()
@@ -84,7 +87,7 @@ exports.accept = function (req, res, next) {
     });
 };
 
-//author
+
 exports.adminOrAuthorTipRequired = function(req,res,next){
 
     var isAdmin  = req.session.user.isAdmin;
@@ -98,6 +101,7 @@ exports.adminOrAuthorTipRequired = function(req,res,next){
         res.send(403);
     }
 };
+
 
 // DELETE /quizzes/:quizId/tips/:tipId
 exports.destroy = function (req, res, next) {

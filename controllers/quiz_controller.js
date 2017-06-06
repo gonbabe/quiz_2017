@@ -1,5 +1,6 @@
 var models = require("../models");
 var Sequelize = require('sequelize');
+var score = 0;
 
 var paginate = require('../helpers/paginate').paginate;
 
@@ -7,11 +8,11 @@ var paginate = require('../helpers/paginate').paginate;
 exports.load = function (req, res, next, quizId) {
 
     models.Quiz.findById(quizId, {
-        include: [
-            models.Tip,
-            {model: models.User, as: 'Author'}
-        ]
-    })
+    include: [
+        {model: models.Tip, include: [{model: models.User, as: 'Author'}]},
+        {model: models.User, as: 'Author'}
+    ]
+})
     .then(function (quiz) {
         if (quiz) {
             req.quiz = quiz;
@@ -223,75 +224,89 @@ exports.check = function (req, res, next) {
     });
 };
 
-var score = 0;
-var count = 0;
-var totalLen = 0;
-var questionsMade = [0];
- models.Quiz.count().then(function(quizzes) {
-        for (var i = 0; i < quizzes; i++) {
-            questionsMade.push(i + 1);
-        }
-     count = quizzes;
-     totalLen = quizzes;
-    }).catch(function(err) {
-        console.log(err);
-    });
 
-// GET /quizzes/randomplay
+// GET /quizzes/:quizId/play
 exports.randomplay = function (req, res, next) {
 
-    var answer = req.query.answer || "";
-    models.Quiz.count().then(function(quizzes) {
-        var rand = Math.floor((Math.random() * quizzes) + 1);
-        var show = 0;
-        if (count > 0) {
-        while (questionsMade.indexOf(rand) === -1) {
-            rand = Math.floor((Math.random() * totalLen) + 1);
-        }
-         show = questionsMade[questionsMade.indexOf(rand)];
-         questionsMade[questionsMade.indexOf(rand)] = 0;
-         count--;
-         return models.Quiz.findById(show);
-        } else {
-         res.render('quizzes/random_nomore', {
-               score: score
-            });
-        }
-    }).then(function(quiz) {
-        if (quiz) {
-            res.render('quizzes/random_play', {
-               quiz: quiz,
-               answer: answer,
-               score: score
-            });
-        } else {
-            throw new Error('No existe ningún quiz con id=' + quizId);
-        }
-    }).catch(function(err) {
-        console.log(err);
-    });
+
+
+    if(!req.session.score) req.session.score=0;
+    if(!req.session.quizzes) req.session.quizzes=[-1];
+
     
-    //req.quiz = quiz;
+
+    models.Quiz.count()
+    .then(function (count) {
+    
+        return models.Quiz.findAll({
+
+            where:  {id: {$notIn: req.session.quizzes}}
+
+        })
+        
+     })              
+    .then(function(quizzes){
+        var quizID=-1;
+        if(quizzes.length>0){
+            var aleatorio = parseInt(Math.random()*quizzes.length);
+            quizID=quizzes[aleatorio].id;
+
+        }else{
+            res.render('quizzes/random_nomore', {
+
+                
+                score: req.session.score
+                
+            });
+        }
+
+        return models.Quiz.findById(quizID);
+
+    })
+    .then(function(quiz){
+        if(quiz){
+            req.session.quizzes.push(quiz.id);
+       
+            res.render('quizzes/random_play', {
+
+                quiz: quiz,
+                score: req.session.score,
+              
+
+            });
+        }
+    
+ })
+    .catch(function(error) {
+      req.flash('error', 'Error al cargar el quiz' + error.message);
+      next(error);
+
+    });
 };
 
-// GET /quizzes/:quizId/randomcheck
+
+
+// GET /quizzes/random_check
 exports.randomcheck = function (req, res, next) {
 
-    var answer = req.query.answer || "";
+    
+
+    var answer = req.query.answer || '';
 
     var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
-    
-    if (result) {
-        score++;
-    } else {
-        score = 0
-        //questionsMade=[0];
+    if (result){
+        req.session.score++;
+    }else{
+        req.session.score=0;
+        req.session.quizzes=[-1];
     }
 
+    
+
     res.render('quizzes/random_result', {
+        score: req.session.score,
         quiz: req.quiz,
         result: result,
-        answer: answer,
-        score: score
+        answer: answer  
     });
 };
