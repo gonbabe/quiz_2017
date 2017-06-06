@@ -1,3 +1,4 @@
+
 {
   "name": "quiz-2017",
   "version": "0.0.0",
@@ -6,8 +7,8 @@
     "start": "node ./bin/www",
     "migrate_local": "./node_modules/.bin/sequelize db:migrate --url sqlite://$(pwd)/quiz.sqlite",
     "seed_local": "./node_modules/.bin/sequelize db:seed:all --url sqlite://$(pwd)/quiz.sqlite",
-    "migrate_heroku": "heroku run ./node_modules/.bin/sequelize db:migrate --url \\postgres://xwhuabcedkpsnc:9ad09a1444075027c37fb7d98df738d5647178d2da1c3f620ab3dd87252af887@ec2-46-137-97-169.eu-west-1.compute.amazonaws.com:5432/d56sjs5eiei8qu",
-    "seed_heroku": "heroku run ./node_modules/.bin/sequelize db:seed:all --url \\postgres://xwhuabcedkpsnc:9ad09a1444075027c37fb7d98df738d5647178d2da1c3f620ab3dd87252af887@ec2-46-137-97-169.eu-west-1.compute.amazonaws.com:5432/d56sjs5eiei8qu"
+    "migrate_heroku": "heroku run ./node_modules/.bin/sequelize db:migrate --url \\$DATABASE_URL",
+    "seed_heroku": "heroku run ./node_modules/.bin/sequelize db:seed:all --url \\$DATABASE_URL"
   },
   "engines": {
     "node": "6.8.x",
