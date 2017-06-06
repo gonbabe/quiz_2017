@@ -83,6 +83,20 @@ exports.accept = function (req, res, next) {
     });
 };
 
+//author
+exports.adminOrAuthorTipRequired = function(req,res,next){
+
+    var isAdmin  = req.session.user.isAdmin;
+    var isAuthor = req.quiz.AuthorId === req.session.user.id;
+    var isAuthorTip = req.tip.AuthorId === req.session.user.id;
+
+    if (isAdmin || isAuthor || idAuthorTip) {
+        next();
+    } else {
+        console.log('Operación prohibida: El usuario logeado no es el autor del quiz, ni un administrador.');
+        res.send(403);
+    }
+};
 
 // DELETE /quizzes/:quizId/tips/:tipId
 exports.destroy = function (req, res, next) {

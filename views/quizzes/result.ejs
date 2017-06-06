@@ -10,6 +10,9 @@
 <p>
     <% if (!result) { %>
         <a href="/quizzes/<%= quiz.id %>/play?answer=<%= answer %>"> Inténtelo otra vez </a>
+        
+    <% if (!result) { %>  		//Esto solo aparece si la respuesta es incorrecta
+       <a href="/quizzes/<%= quiz.id %>/play?answer=<%= answer %>"> Inténtelo otra vez </a>
     <% } %>
 </p>
 
