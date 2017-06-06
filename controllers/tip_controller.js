@@ -102,7 +102,6 @@ exports.adminOrAuthorTipRequired = function(req,res,next){
     }
 };
 
-
 // DELETE /quizzes/:quizId/tips/:tipId
 exports.destroy = function (req, res, next) {
 
